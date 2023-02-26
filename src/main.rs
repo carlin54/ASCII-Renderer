@@ -1,6 +1,5 @@
 use std::borrow::Borrow;
 use image::{DynamicImage, imageops, GenericImageView, ImageBuffer, Rgba, RgbImage, SubImage, RgbaImage, Pixel, GenericImage};
-use image::{DynamicImage, imageops, GenericImageView, ImageBuffer, Rgba, RgbImage, SubImage, RgbaImage, Pixel};
 use rusttype::{Point, Font, GlyphId, GlyphIter, Scale, Glyph, Rect, PositionedGlyph};
 use std::cmp;
 use std::fmt::format;
@@ -15,15 +14,14 @@ fn convolve(kernel: &SubImage<&mut DynamicImage>, character: &RgbaImage) -> f64 
 
     for x in 0..width {
         for y in 0..height {
-            s += (kernel.get_pixel(x, y).channels()[0] as f64)
-                * (character.get_pixel(x, y).channels()[0] as f64);
+            s += (kernel.get_pixel(x, y).channels()[0] as f64) * (character.get_pixel(x, y).channels()[0] as f64);
         }
     }
 
     return s / ((width * height) as f64)
 }
 
-fn match_character(kernel: &DynamicImage, characters: &Vec<RgbaImage>, x: u32, y: u32) -> usize {
+fn match_character(kernel: &SubImage<&mut DynamicImage>, characters: &Vec<RgbaImage>) -> usize {
 
     for character in characters {
         character.width();
@@ -41,7 +39,7 @@ fn match_character(kernel: &DynamicImage, characters: &Vec<RgbaImage>, x: u32, y
     return max_index;
 }
 
-fn paint_background(img: &mut image::DynamicImage, colour: &image::Rgba<u8>) {
+fn paint_background(img: &mut image::RgbaImage, colour: &image::Rgba<u8>) {
     for x in 0..img.width() {
         for y in 0..img.height() {
            img.put_pixel(x, y, *colour) ;
@@ -49,25 +47,28 @@ fn paint_background(img: &mut image::DynamicImage, colour: &image::Rgba<u8>) {
     }
 }
 
-fn paint_character(img: &mut image::DynamicImage, colour: &image::Rgba<u8>, glyph: &PositionedGlyph) {
-    let (r, g, b, a) = colour.channels();
+fn paint_character(img: &mut image::RgbaImage, colour: &image::Rgba<u8>, glyph: &PositionedGlyph) {
+    let (r, g, b, a) = colour.channels4();
+
     let o = |x, y, v| {
-        image.put_pixel(
+
+        img.blend_pixel(
             // Offset the position by the glyph bounding box
             x as u32,
             y as u32,
 
             // Turn the coverage into an alpha value
-            Rgba([r, g, b, (v * a) as u8]),
+            Rgba([r, g, b, (v * (a as f32)) as u8]),
         )
     };
+
     glyph.draw(o);
 }
 
 fn main() {
-    let font_data = include_bytes!("../fonts/AllerDisplay.ttf");
+    let font_data = include_bytes!("../fonts/Arial-Monospaced.ttf");
     let font = Font::try_from_bytes(font_data).unwrap();
-
+    let image_name = "ghost_in_the_shell.png";
     let colour = (150, 0, 0);
 
     // Desired font pixel height
@@ -75,8 +76,8 @@ fn main() {
     let pixel_height = height.ceil() as usize;
 
     let scale = Scale {
-        x: 16.0,
-        y: 16.0
+        x: 64.0,
+        y: 64.0
     };
 
     let point = Point {
@@ -102,14 +103,18 @@ fn main() {
         max: Point { x: 0.0, y: 0.0 },
     };
 
-    let mut character_colors: Vec<Rgba<u8>> = Vec::new();
-    character_colors.push(Rgba([255,255,255,255]));
-    character_colors.push(Rgba([0,0,0,255]));
+    let mut glyph_colours: Vec<Rgba<u8>> = Vec::new();
+    glyph_colours.push(Rgba([255,0,0,255]));
+    glyph_colours.push(Rgba([0,255,0,255]));
+    glyph_colours.push(Rgba([0,0,255,255]));
 
-    let mut character_background: Vec<Rgba<u8>> = Vec::new();
-    character_background.push(Rgba([255,255,255,255]));
-    character_background.push(Rgba([0,0,0,255]));
+    //glyph_colours.push(Rgba([0,0,0,255]));
 
+    let mut glyph_background: Vec<Rgba<u8>> = Vec::new();
+    //glyph_background.push(Rgba([255,255,255,255]));
+    glyph_background.push(Rgba([0,0,0,255]));
+
+    let mut counter = 1;
     for i in 0u16..font.glyph_count().try_into().unwrap() {
         let glyphId = GlyphId(i);
 
@@ -126,29 +131,33 @@ fn main() {
         glyph_width = std::cmp::max(glyph_width, width);
         glyph_height = std::cmp::max(glyph_height, height);
 
+
+        for background_colour in &glyph_background {
+            let mut background = DynamicImage::new_rgba8(width, height).to_rgba8();
+
+            paint_background(&mut background, background_colour);
+            for glyph_colour in &glyph_colours {
+                //if let Some(bb) = glyph.pixel_bounding_box() {
+                let mut glyph = background.clone();
+                paint_character(&mut glyph, glyph_colour, &positioned_glyph);
+                // Could add rotation as well
+                glyph.save(format!("./images/glyphs/{}.png", counter)).expect("TODO: panic message");
+                counter += 1;
+
+                glyph_width = glyph_width.max(glyph.width());
+                glyph_height= glyph_height.max(glyph.height());
+
+                rendered_glyphs.push(glyph);
+
+            }
+        }
+
         glyphs.push(positioned_glyph);
 
-        for background in character_background {
-            let mut image = DynamicImage::new_rgba8(width, height).to_rgba8();
-
-            paint_background(image, background);
-            for colour in character_colors {
-                //if let Some(bb) = glyph.pixel_bounding_box() {
-                paint_character(image, colour, glyph);
-
-
-                rendered_glyphs.push(image);
-            }
-
-        }
-
-        if i > 32 {
-            break;
-        }
     }
 
 
-    //println!("glyph_width: {}, glyph_height: {}", glyph_width, glyph_height);
+    println!("glyph_width: {}, glyph_height: {}", glyph_width, glyph_height);
     //let mut rendered_glyphs : Vec<RgbaImage> = Vec::new();
 
     println!("Rendering glyphs into bitmaps.");
@@ -172,7 +181,7 @@ fn main() {
                 };
 
                 glyph.draw(o);
-                let path = format!("./export/{}.png", counter);
+                //let path = format!("./export/{}.png", counter);
                 //image.save(path).expect("TODO: panic message");
 
                 rendered_glyphs.push(image);
@@ -180,26 +189,24 @@ fn main() {
         }
     }
     println!("Converting the image rendering image to grayscale.");
-    let mut img = image::open("./images/test_image.jpg").unwrap();
+    let mut img = image::open("./images/input/".to_owned() + image_name).unwrap();
     let (width, height) = img.dimensions();
-    let (kx, ky) = (glyph_width, glyph_height);
+    let (kx, ky) = (glyph_width * 2, glyph_height * 2);
     let (stride_x, stride_y) = (glyph_width as usize, glyph_height as usize);
 
     let mut img_gray = img.grayscale();
     let mut out: RgbaImage = ImageBuffer::new(width * 2, height * 2);
-    out.save("./export/output_image.png").expect("TODO: panic message");
 
     // 1. Filter Size
     for x in (0..width - kx).step_by(stride_x) {
         for y in (0..height - ky).step_by(stride_y) {
+
             let subimg = imageops::crop(&mut img_gray, x, y, kx, ky);
-
-
             let index = match_character(&subimg, &rendered_glyphs);
             let character = &rendered_glyphs[index];
             imageops::overlay(&mut out, character, x as i64, y as i64);
         }
     }
 
-    out.save("./export/output_image.png").expect("TODO: panic message");
+    out.save("./images/output/".to_owned() + image_name).expect("TODO: panic message");
 }
