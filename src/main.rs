@@ -5,38 +5,86 @@ use std::cmp;
 use std::fmt::format;
 use std::ops::Index;
 
+fn filter_diff(kernel: &SubImage<&mut DynamicImage>, character: &RgbaImage) -> f64 {
 
-fn convolve(kernel: &SubImage<&mut DynamicImage>, character: &RgbaImage) -> f64 {
+    let (kw, kh) = kernel.dimensions();
+    let (iw, ih) = character.dimensions();
 
-    let (width, height) = kernel.dimensions();
+    let width = std::cmp::min(kw, iw);
+    let height = std::cmp::min(kh, ih);
 
     let mut s = 0.0;
 
     for x in 0..width {
         for y in 0..height {
-            s += (kernel.get_pixel(x, y).channels()[0] as f64) * (character.get_pixel(x, y).channels()[0] as f64);
+            // TODO: extract this as a lambda
+            s += 255.0 - ((kernel.get_pixel(x, y).channels()[0] as f64) -
+                (character.get_pixel(x, y).channels()[0] as f64)).abs();
+
+            s += 255.0 - ((kernel.get_pixel(x, y).channels()[1] as f64) -
+                (character.get_pixel(x, y).channels()[1] as f64)).abs();
+
+            s += 255.0 - ((kernel.get_pixel(x, y).channels()[2] as f64) -
+                (character.get_pixel(x, y).channels()[2] as f64)).abs();
         }
     }
 
     return s / ((width * height) as f64)
 }
 
+fn filter_convolve(kernel: &SubImage<&mut DynamicImage>, character: &RgbaImage) -> f64 {
+
+    let (kw, kh) = kernel.dimensions();
+    let (iw, ih) = character.dimensions();
+
+    let width = std::cmp::min(kw, iw);
+    let height = std::cmp::min(kh, ih);
+
+    let mut s = 0.0;
+
+    for x in 0..width {
+        for y in 0..height {
+
+            s += (kernel.get_pixel(x, y).channels()[0] as f64) *
+                (character.get_pixel(x, y).channels()[0] as f64);
+
+            s += (kernel.get_pixel(x, y).channels()[1] as f64) *
+                (character.get_pixel(x, y).channels()[1] as f64);
+
+            s += (kernel.get_pixel(x, y).channels()[2] as f64) *
+                (character.get_pixel(x, y).channels()[2] as f64);
+
+        }
+    }
+
+    return s / ((width * height) as f64)
+}
+
+
+fn optimized_filter(kernel: &SubImage<&mut DynamicImage>, character: &RgbaImage) -> (u32, u32) {
+    let (kw, kh) = kernel.dimensions();
+    let (iw, ih) = character.dimensions();
+    return (3, 3);
+}
+
 fn match_character(kernel: &SubImage<&mut DynamicImage>, characters: &Vec<RgbaImage>) -> usize {
 
-    for character in characters {
-        character.width();
-        character.height();
+    let results: Vec<f64> = Vec::new();
+    let mut max_idx = 0;
+    let mut max_value : f64 = -1.0;
+    for (idx, character) in characters.iter().enumerate() {
+        let value = filter_diff(kernel, character);
+
+        if (value > max_value) {
+            max_value = value;
+            max_idx = idx;
+        }
+
     }
-    let results: Vec<f64> = characters.iter().map(
-        |character| convolve(kernel, character)
-    ).collect();
 
+    println!("max index: {}, max value: {}", max_idx, max_value);
 
-    let (max_index, max_value) = results.into_iter().enumerate().max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap()).unwrap();
-
-    println!("max index: {}, max value: {}", max_index, max_value);
-
-    return max_index;
+    return max_idx;
 }
 
 fn paint_background(img: &mut image::RgbaImage, colour: &image::Rgba<u8>) {
@@ -68,7 +116,7 @@ fn paint_character(img: &mut image::RgbaImage, colour: &image::Rgba<u8>, glyph: 
 fn main() {
     let font_data = include_bytes!("../fonts/Arial-Monospaced.ttf");
     let font = Font::try_from_bytes(font_data).unwrap();
-    let image_name = "ghost_in_the_shell.png";
+    let image_name = "clouds.png";
     let colour = (150, 0, 0);
 
     // Desired font pixel height
@@ -76,8 +124,8 @@ fn main() {
     let pixel_height = height.ceil() as usize;
 
     let scale = Scale {
-        x: 64.0,
-        y: 64.0
+        x: 16.0,
+        y: 16.0
     };
 
     let point = Point {
@@ -104,18 +152,34 @@ fn main() {
     };
 
     let mut glyph_colours: Vec<Rgba<u8>> = Vec::new();
+    /*
     glyph_colours.push(Rgba([255,0,0,255]));
     glyph_colours.push(Rgba([0,255,0,255]));
     glyph_colours.push(Rgba([0,0,255,255]));
+     */
 
+    glyph_colours.push(Rgba([255,255,255,255]));
+    //glyph_colours.push(Rgba([0,0,0,255]));
     //glyph_colours.push(Rgba([0,0,0,255]));
 
     let mut glyph_background: Vec<Rgba<u8>> = Vec::new();
-    //glyph_background.push(Rgba([255,255,255,255]));
     glyph_background.push(Rgba([0,0,0,255]));
+    glyph_background.push(Rgba([255,0,0,255]));
+    glyph_background.push(Rgba([0,255,0,255]));
+    glyph_background.push(Rgba([0,0,255,255]));
+    //glyph_background.push(Rgba([255,255,255,255]));
+    //glyph_background.push(Rgba([250,255,255,255]));
+    //glyph_background.push(Rgba([0,0,0,255]));
 
-    let mut counter = 1;
+    let start = 0;
+    let end = font.glyph_count() as u16;
+    let mut counter = 0;
     for i in 0u16..font.glyph_count().try_into().unwrap() {
+
+        if i < start || i > end {
+            continue;
+        }
+
         let glyphId = GlyphId(i);
 
         let scaled_glyph = font.glyph(glyphId).scaled(scale);
@@ -126,8 +190,10 @@ fn main() {
             continue;
         }
 
+
         let positioned_glyph = scaled_glyph.positioned(point);
 
+        println!("width: {}, height: {}", width, height);
         glyph_width = std::cmp::max(glyph_width, width);
         glyph_height = std::cmp::max(glyph_height, height);
 
@@ -145,7 +211,7 @@ fn main() {
                 counter += 1;
 
                 glyph_width = glyph_width.max(glyph.width());
-                glyph_height= glyph_height.max(glyph.height());
+                glyph_height = glyph_height.max(glyph.height());
 
                 rendered_glyphs.push(glyph);
 
@@ -191,7 +257,7 @@ fn main() {
     println!("Converting the image rendering image to grayscale.");
     let mut img = image::open("./images/input/".to_owned() + image_name).unwrap();
     let (width, height) = img.dimensions();
-    let (kx, ky) = (glyph_width * 2, glyph_height * 2);
+    let (kx, ky) = (glyph_width, glyph_height);
     let (stride_x, stride_y) = (glyph_width as usize, glyph_height as usize);
 
     let mut img_gray = img.grayscale();
@@ -201,7 +267,7 @@ fn main() {
     for x in (0..width - kx).step_by(stride_x) {
         for y in (0..height - ky).step_by(stride_y) {
 
-            let subimg = imageops::crop(&mut img_gray, x, y, kx, ky);
+            let subimg = imageops::crop(&mut img, x, y, kx, ky);
             let index = match_character(&subimg, &rendered_glyphs);
             let character = &rendered_glyphs[index];
             imageops::overlay(&mut out, character, x as i64, y as i64);
