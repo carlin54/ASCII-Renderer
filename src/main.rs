@@ -6,6 +6,8 @@ use std::fmt::format;
 use std::ops::Index;
 use std::sync::{Arc, Mutex};
 use rayon::prelude::*;
+use rayon::ThreadPoolBuilder;
+use std::time::Instant;
 
 fn filter_diff(kernel: &SubImage<&DynamicImage>, character: &RgbaImage) -> f64 {
 
@@ -115,15 +117,96 @@ fn paint_character(img: &mut image::RgbaImage, colour: &image::Rgba<u8>, glyph: 
     glyph.draw(o);
 }
 
-fn main() {
+
+fn colour_scheme_hacker_green(colours: &mut Vec<Rgba<u8>>) {
+    colours.push(Rgba([20,148,29,255]));
+    colours.push(Rgba([20,107,14,255]));
+    colours.push(Rgba([100,149,104,255]));
+    colours.push(Rgba([156,204,156,255]));
+    colours.push(Rgba([43,83,41,255]));
+}
+
+fn colour_scheme_gray_scale(colours: &mut Vec<Rgba<u8>>, gradations: u8) {
+    let step = (255.0 / gradations as f64) as usize;
+    for i in (0..=255).step_by(step.into()) {
+        colours.push(Rgba([i as u8,i as u8,i as u8,255]));
+    }
+}
+
+
+fn colour_scheme_plotlogic(colours: &mut Vec<Rgba<u8>>) {
+
+
+    colours.push(Rgba([31,52,115,255]));
+    colours.push(Rgba([41,83,166,255]));
+    colours.push(Rgba([50,186,217,255]));
+    colours.push(Rgba([27,166,152,255]));
+    /*
+    colours.push(Rgba([27,50,106,255]));
+    colours.push(Rgba([75,190,211,255]));
+    colours.push(Rgba([21,157,158,255]));
+    colours.push(Rgba([4,15,55,255]));
+    colours.push(Rgba([204,218,226,255]));
+    colours.push(Rgba([18,38,87,255]));
+    colours.push(Rgba([47,170,215,255]));
+    colours.push(Rgba([44,116,183,255]));
+    colours.push(Rgba([110,136,162,255]));
+     */
+}
+
+
+fn colour_scheme_gradations(colours: &mut Vec<Rgba<u8>>, gradations: u8) {
+
+    for i in 0..gradations {
+        let t = i as f32 / (gradations - 1) as f32;
+        let R = (255.0 * t) as i32;
+        let G = (255.0 * (1.0 - t)) as i32;
+        let B = 0;
+        colours.push(Rgba([R as u8, G as u8, B as u8, 255]));
+    }
+
+    for i in 0..gradations {
+        let t = i as f32 / (gradations - 1) as f32;
+        let R = 0;
+        let G = (255.0 * t) as i32;
+        let B = (255.0 * (1.0 - t)) as i32;
+        colours.push(Rgba([R as u8, G as u8, B as u8, 255]));
+    }
+
+    for i in 0..gradations {
+        let t = i as f32 / (gradations - 1) as f32;
+        let R = (255.0 * (1.0 - t)) as i32;
+        let G = 0;
+        let B = (255.0 * t) as i32;
+        colours.push(Rgba([R as u8, G as u8, B as u8, 255]));
+    }
+}
+
+fn print_eta(completed: u32, total: u32, start_time: Instant){
+    let percentage = (completed as f64 / total as f64) * 100.0;
+    let elapsed_time = start_time.elapsed().as_secs_f64(); // Calculate the elapsed time
+    let eta = if completed > 0 {
+        elapsed_time * (total as f64/ completed as f64 - 1.0)
+    } else {
+        0.0
+    };
+
+    let eta_mins = (eta / 60.0).floor();
+    let eta_secs = (eta % 60.0).floor();
+
+    println!("{:.2}%, ETA: {:.0}m {:.0}s", percentage, eta_mins, eta_secs);
+}
+
+fn parse(font_path: str, image_path: str) {
 
     /*
         1. Preprocess the image
-            -
+            - Greyscale
+
 
         2. Generate the characters
             - Generate backgrounds colours
-            - Generate glyph colours
+            - Generate glyph colours - Histogram of colour
             - Scale glyphs
             - Render glyphs
 
@@ -132,12 +215,23 @@ fn main() {
             - Multi threaded
 
         TODO:
+            - Colour picking tool
+            - Exporting for .bashrc
+            - Estimate the compute time
+            - Generate output/input
             - GPU, CUDA or WebAssembly
             - ANN (tff, scale, backgrounds, colours)
+                - Train a large network, just do drop out on the glyphs that dont exist
      */
-    let font_data = include_bytes!("../fonts/Arial-Monospaced.ttf");
+    let num_threads = 24;
+    ThreadPoolBuilder::new()
+        .num_threads(num_threads)
+        .build_global()
+        .unwrap();
+
+    let font_data = include_bytes!(font_path);
     let font = Font::try_from_bytes(font_data).unwrap();
-    let image_name = "gits_4.jpg";
+    let image_name = image_path;
     let mut img = image::open("./images/input/".to_owned() + image_name).unwrap();
 
     let colour = (150, 0, 0);
@@ -147,8 +241,8 @@ fn main() {
     let pixel_height = height.ceil() as usize;
 
     let scale = Scale {
-        x: 16.0,
-        y: 16.0
+        x: 18.0,
+        y: 18.0
     };
 
     let point = Point {
@@ -176,68 +270,20 @@ fn main() {
 
     // Colour pallet method
     let mut glyph_colours: Vec<Rgba<u8>> = Vec::new();
-
-    /*for i in (0..=255).step_by(32) {
-        let R = i % 255 as i32;
-        let G = (i + 85) % 255 as i32;
-        let B = (i + 85 * 2) % 255 as i32;
-        println!("{R}, {G}, {B}");
-        glyph_colours.push(Rgba([R as u8,G as u8,B as u8,255]));
-    }*/
-
-    /*
-    glyph_colours.push(Rgba([255,0,0,255]));
-    glyph_colours.push(Rgba([255,255,0,255]));
-    glyph_colours.push(Rgba([0,255,0,255]));
-    glyph_colours.push(Rgba([0,255,255,255]));
-    glyph_colours.push(Rgba([0,0,255,255]));
-    glyph_colours.push(Rgba([255,0,255,255]));
-    glyph_colours.push(Rgba([255,255,255,255]));
-    */
-
-    //Multi Colours
-    for i in (0..=255).step_by(4) {
-        let R = i % 255 as i32;
-        let G = (i + 85) % 255 as i32;
-        let B = (i + 85 * 2) % 255 as i32;
-        println!("{R}, {G}, {B}");
-        glyph_colours.push(Rgba([R as u8,G as u8,B as u8,255]));
-    }
-
-    //glyph_colours.push(Rgba([0,0,0,255]));
-    // glyph_colours.push(Rgba([0,0,0,255]));
     let mut glyph_background: Vec<Rgba<u8>> = Vec::new();
-    glyph_background.push(Rgba([0,0,0,255]));
+    let black = Rgba([0,0,0,255]);
+    let white = Rgba([255,255,255,255]);
 
-    /*
-    //Grey Scale
-    for i in (0..=255).step_by(64) {
-        glyph_colours.push(Rgba([i as u8,i as u8,i as u8,255]));
-    }
-    */
+    colour_scheme_gray_scale(&mut glyph_background, 3);
+    glyph_background.push(white);
+    glyph_colours.push(black);
+    //colour_scheme_gradations(&mut glyph_background, 3);
+    //colour_scheme_gradations(&mut glyph_colours, 4);
+    colour_scheme_gray_scale(&mut glyph_colours, 7);
+    //colour_scheme_plotlogic(&mut glyph_colours);
+    //glyph_colours.push(black);
 
-    /*
-    // Multi coloured
-    for i in (0..=255).step_by(64) {
-        let R = i % 255 as i32;
-        let G = (i + 85) % 255 as i32;
-        let B = (i + 85 * 2) % 255 as i32;
-        println!("{R}, {G}, {B}");
-        glyph_colours.push(Rgba([R as u8,G as u8,B as u8,255]));
-    }
-    */
-    /*
-    // Glyph background
-    glyph_background.push(Rgba([0,0,0,255]));
-    glyph_background.push(Rgba([255,0,0,255]));
-    glyph_background.push(Rgba([255,255,0,255]));
-    glyph_background.push(Rgba([0,255,0,255]));
-    glyph_background.push(Rgba([0,255,255,255]));
-    glyph_background.push(Rgba([0,0,255,255]));
-    glyph_background.push(Rgba([255,0,255,255]));
-    */
-
-    let start= 0; // = 36;
+    let start= 36; // = 36;
     let end = font.glyph_count() as u16; // = 36+25; //
 
     let glyph_background_size = "glyph-min";
@@ -245,6 +291,7 @@ fn main() {
 
     let mut max_height = 0;
     let mut max_width = 0;
+    let interception = true;
 
     // Get the max width, max height
     for i in 0u16..font.glyph_count().try_into().unwrap() {
@@ -260,7 +307,6 @@ fn main() {
 
         max_width = std::cmp::max(width, max_width);
         max_height = std::cmp::max(height, max_height);
-
     }
 
     // Get
@@ -383,14 +429,16 @@ fn main() {
     let total_kernel_ops = ((width - kx) / stride_x as u32) * ((height - ky) / stride_y as u32);
     let mut data = vec![];
     for x in (0..width - kx).step_by(stride_x) {
-       for y in (0..height - ky).step_by(stride_y) {
-           let subimg = img.view(x, y, kx, ky);
-           let item = (subimg, x, y);
-           data.push(item);
-       }
+        for y in (0..height - ky).step_by(stride_y) {
+            let subimg = img.view(x, y, kx, ky);
+            let item = (subimg, x, y);
+            data.push(item);
+        }
     }
 
     let results = Arc::new(Mutex::new(Vec::with_capacity(data.len())));
+    let start_time = Instant::now(); // Record the start time before the loop starts
+
     data.par_iter().for_each(|item| {
         let subimg = &item.0;
         let x = &item.1;
@@ -400,8 +448,7 @@ fn main() {
         let result = (index, x, y);
         let mut results_guard = results.lock().unwrap();
         results_guard.push(result);
-        let percentage = (results_guard.len() as f64 / total_kernel_ops as f64) * 100.0;
-        println!("{} of {}, {:.2}%", results_guard.len(), total_kernel_ops, percentage)
+        print_eta(results_guard.len() as u32, total_kernel_ops, start_time);
     });
 
     let results_guard = results.lock().unwrap();
@@ -416,3 +463,4 @@ fn main() {
 
     out.save("./images/output/".to_owned() + image_name).expect("TODO: panic message");
 }
+
