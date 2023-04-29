@@ -9,63 +9,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0c254987-275c-48ca-9346-a837519a5d2e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/rust/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/Cargo.toml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/fonts/Arial-Monospaced.ttf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/fonts/OpenSans-Regular.ttf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/fonts/Raleway-Regular.ttf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/fonts/Roboto-Regular.ttf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/abcd.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/abcd_edge.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/akira.jpeg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/beserker_1.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/beserker_10.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/beserker_11.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/beserker_12.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/beserker_2.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/beserker_3.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/beserker_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/beserker_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/beserker_5.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/beserker_6.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/beserker_7.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/beserker_8.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/beserker_9.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/castle.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/clouds.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/cyberbike.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/david.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/gits_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/gits_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/gits_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/gits_4.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/lewd_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/lewd_2.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/plotlogic_logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/silver_surfer.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/woman_1.jpeg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/woman_2.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/woman_3.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/woman_4.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/images/input/woman_5.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/src/AsciiImageTransformer.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/src/lib.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rust/src/main.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/App.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/App.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/App.test.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/ColorPickerQueue.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/FontLoader.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/ImageLoader.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/index.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/index.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/logo.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/reportWebVitals.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/setupTests.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fonts/Arial-Monospaced.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/rust/src/main_old.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/FontImageTransformer.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/GlyphTile.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/css/GlyphTile.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust/src/AsciiImageTransformer.rs" beforeDir="false" afterPath="$PROJECT_DIR$/rust/src/FontImageTransformer.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/ColorPickerQueue.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ColorPickerQueue.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/FontLoader.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FontLoader.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/ImageLoader.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ImageLoader.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,6 +28,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Rust File" />
+        <option value="JavaScript File" />
       </list>
     </option>
   </component>
@@ -166,11 +119,22 @@
       <workItem from="1681015554606" duration="7492000" />
       <workItem from="1681553322027" duration="767000" />
       <workItem from="1681609421070" duration="1262000" />
-      <workItem from="1682740972272" duration="608000" />
+      <workItem from="1682740972272" duration="12597000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>

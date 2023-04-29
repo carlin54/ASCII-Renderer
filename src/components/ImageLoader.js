@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Button from 'react-bootstrap/Button';
+import {  Row, Col } from 'react-bootstrap';
 
 class ImageLoader extends Component {
     constructor(props) {
@@ -33,31 +34,40 @@ class ImageLoader extends Component {
 
         return (
             <div>
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={this.handleImageChange}
-                    id="image-input"
-                    style={{ display: 'none' }}
-                />
-                <label htmlFor="image-input">
-                    <Button variant="primary" as="span">
-                        Upload Image
-                    </Button>
-                </label>
-                {imageUrl && (
-                    <img
-                        src={imageUrl}
-                        alt="Uploaded"
-                        className="img-fluid mt-3"
-                        style={{ maxHeight: '300px' }}
-                    />
-                )}
-                {error && (
-                    <p className="text-danger mt-3">
-                        {error}
-                    </p>
-                )}
+                <h1 className="mb-4">Select Image</h1>
+                <Row>
+                    <Col>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={this.handleImageChange}
+                            id="image-input"
+                            style={{ display: 'none' }}
+                        />
+                        <label htmlFor="image-input">
+                            <Button variant="primary" as="span">
+                                Upload Image
+                            </Button>
+                        </label>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        {imageUrl && (
+                            <img
+                                src={imageUrl}
+                                alt="Uploaded"
+                                className="img-fluid mt-3"
+                                style={{ maxHeight: '300px' }}
+                            />
+                        )}
+                        {error && (
+                            <p className="text-danger mt-3">
+                                {error}
+                            </p>
+                        )}
+                    </Col>
+                </Row>
             </div>
         );
     }

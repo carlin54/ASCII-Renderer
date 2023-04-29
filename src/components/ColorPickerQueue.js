@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, ListGroup, ListGroupItem, Row, Col } from 'react-bootstrap';
 import { SketchPicker } from 'react-color';
 
-const ColorPickerQueue = ({ title, onColorAdded }) => {
+const ColorPickerQueue = ({ title, onColorsChanged }) => {
     const [colors, setColors] = useState([]);
     const [showPicker, setShowPicker] = useState(false);
     const [currentColor, setCurrentColor] = useState('#000000');
@@ -11,41 +11,54 @@ const ColorPickerQueue = ({ title, onColorAdded }) => {
         setCurrentColor(color.hex);
     };
 
-    const addColorToQueue = () => {
-        setColors([...colors, currentColor]);
-        onColorAdded && onColorAdded(currentColor);
+    const addColor = () => {
+        setColors((prevColors) => {
+            const newColors = [...prevColors, currentColor];
+            onColorsChanged && onColorsChanged(newColors);
+            return newColors;
+        });
     };
 
-    const deleteColorFromQueue = (index) => {
-        setColors(colors.filter((_, i) => i !== index));
+    const removeColor = (index) => {
+        setColors((prevColors) => {
+            const newColors = prevColors.filter((_, i) => i !== index);
+            onColorsChanged && onColorsChanged(newColors);
+            return newColors;
+        });
     };
 
     return (
         <div>
             <h5>{title}</h5>
-            <Button variant="primary" onClick={() => setShowPicker(!showPicker)}>
-                {showPicker ? 'Close' : 'Open'} Color Picker
-            </Button>
+            <Row className="align-items-center">
+                <Col>
+                    <Button variant="primary" onClick={() => setShowPicker(!showPicker)}>
+                        {showPicker ? 'Close' : 'Open'} Color Picker
+                    </Button>
+                </Col>
+            </Row>
+
             {showPicker && (
-                <SketchPicker
-                    color={currentColor}
-                    onChangeComplete={handleColorChange}
-                />
+                <Row className="align-items-center">
+                    <Col>
+                        <SketchPicker color={currentColor} onChangeComplete={handleColorChange} />
+                    </Col>
+                </Row>
             )}
-            <Button className="mt-3" variant="success" onClick={addColorToQueue}>
-                Add Color to Queue
-            </Button>
+            <Row className="align-items-center">
+                <Col>
+                    <Button className="mt-3" variant="success" onClick={addColor}>
+                        Add Color to Queue
+                    </Button>
+                </Col>
+            </Row>
             <ListGroup className="mt-3">
                 {colors.map((color, index) => (
                     <ListGroupItem key={index} style={{ backgroundColor: color }}>
                         <Row>
                             <Col>{color}</Col>
                             <Col xs="auto">
-                                <Button
-                                    variant="danger"
-                                    size="sm"
-                                    onClick={() => deleteColorFromQueue(index)}
-                                >
+                                <Button variant="danger" size="sm" onClick={() => removeColor(index)}>
                                     Delete
                                 </Button>
                             </Col>

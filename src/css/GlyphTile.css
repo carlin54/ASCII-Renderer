@@ -1,0 +1,10 @@
+/* GlyphTile.css */
+.glyph-tile {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100px;
+    height: 100px;
+    margin: 8px;
+    border: 1px solid #ccc;
+}

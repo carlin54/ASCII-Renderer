@@ -11,16 +11,16 @@ use std::time::Instant;
 
 
 #[wasm_bindgen]
-pub struct AsciiImageTransformer {
+pub struct FontImageTransformer {
     status_callback: Option<Box<dyn Fn(f64)>>,
     status: bool,
 }
 
 #[wasm_bindgen]
-impl AsciiImageTransformer {
+impl FontImageTransformer {
     #[wasm_bindgen(constructor)]
-    pub fn new() -> AsciiImageTransformer {
-        AsciiImageTransformer {
+    pub fn new() -> FontImageTransformer {
+        FontImageTransformer {
             status_callback: None,
             status: false,
         }
