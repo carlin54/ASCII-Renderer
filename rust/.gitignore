@@ -1,0 +1,6 @@
+/target
+Cargo.lock
+.idea
+/pkg/*
+/images/glyphs/*
+/images/output/*
