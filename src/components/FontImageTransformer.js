@@ -8,7 +8,7 @@ class FontImageTransformer extends Component {
             fontFile: null,
             fontBackgroundColours: [],
             fontForegroundColours: [],
-            fontScale: {"x": 12.0, "y": 12.0}
+            fontScale: {"x": 12.0, "y": 12.0},
             inputImageFile: null,
             outputImage: null,
             status: 'stopped',

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Button } from 'react-bootstrap';
 import { Row, Col } from 'react-bootstrap';
 import ColorPickerQueue from './ColorPickerQueue.js';
+import init, {font_info} from './pkg/ASCII_Renderer.js'
 
 class FontLoader extends Component {
     constructor(props) {
@@ -29,7 +30,6 @@ class FontLoader extends Component {
     handleFontChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
         if (file.type === 'font/ttf' || file.type === 'font/otf') {
             const fontName = file.name.split('.')[0];
             this.setState({
